@@ -1,9 +1,7 @@
-import React, { InputHTMLAttributes, useEffect, useRef, useState, useCallback } from "react";
+import React, { InputHTMLAttributes, useEffect, useRef, useState, useCallback } from 'react';
 import { IconBaseProps } from 'react-icons';
 import { FiAlertCircle } from 'react-icons/fi';
 import { useField } from '@unform/core';
-
-import Tooltip from "../Tooltip";
 
 import { Container, Error } from './styles';
 
