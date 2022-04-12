@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
 
   const [monthAvailability, setMonthAvailability] = useState<MonthAvailabilityItem[]>([]);
 
-  const { signOut, /*user*/ } = useAuth();
+  const { signOut, user } = useAuth();
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
     if (modifiers.available) {
@@ -89,12 +89,10 @@ const Dashboard: React.FC = () => {
           <img src={logoImg} alt="GoBarber" />
 
           <Profile>
-            {/* <img src={user.avatar_url} alt={user.name} /> */}
-            <img src="https://avatars.githubusercontent.com/u/81584638?v=4" alt="Eduardo Silva" />
+            <img src={user.avatar_url} alt={user.name} />
             <div>
               <span>Bem-vindo,</span>
-              {/* <Link><strong>{user.name}</strong></Link> */}
-              <Link to="/profile"><strong>Eduardo</strong></Link>
+              <Link to="/profile"><strong>{user.name}</strong></Link>
             </div>
           </Profile>
 

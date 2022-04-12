@@ -5,6 +5,7 @@ interface User {
   id: number;
   name: string;
   avatar_url: string;
+  email: string
 }
 
 interface AuthState {
@@ -26,6 +27,30 @@ interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
+const userEduardo: User = {
+  id: 46545,
+  name: 'Eduardo Silva',
+  avatar_url: "https://avatars.githubusercontent.com/u/81584638?v=4",
+  email: 'eduardo@email.com'
+}
+
+const userBatman: User = {
+  id: 46545,
+  name: 'Bruce Wayne',
+  avatar_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_cmS706xd4mbzo8I-mbYd8YDviGyzKGX4lQ&usqp=CAU",
+  email: 'batman@email.com'
+}
+
+const fakeApiCall = async (email: string, password: string): Promise<AuthState> =>
+  new Promise((resolve) => setTimeout(() => {
+    if (email === 'eduardo@email.com' && password === '123456') {
+      resolve({token: 'tokenFakeEduardo', user: userEduardo})
+    }
+    if (email === 'batman@email.com' && password === '123456') {
+      resolve({token: 'tokenFakeBatman', user: userBatman})
+    }
+  }, 1000));
+
 const AuthProvider: React.FC = ({ children }) => {
   const [data, setData] = useState<AuthState>(() => {
     const token = localStorage.getItem('@GoBarber:token');
@@ -41,12 +66,16 @@ const AuthProvider: React.FC = ({ children }) => {
   });
 
   const signIn = useCallback(async ({ email, password }) => {
-    const response = await api.post('sessions', {
-      email,
-      password,
-    });
+    // const response = await api.post('sessions', {
+    //   email,
+    //   password,
+    // });
 
-    const { token, user } = response.data;
+    // const { token, user } = response.data;
+
+    const response = await fakeApiCall(email, password);
+
+    const { token, user } = response;
 
     localStorage.setItem('@GoBarber:token', token);
     localStorage.setItem('@GoBarber:user', JSON.stringify(user));

@@ -10,7 +10,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import { Container, Content, AvatarInput } from './styles';
-// import { useAuth } from '../../hooks/auth';
+import { useAuth } from '../../hooks/auth';
 // import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
@@ -27,7 +27,7 @@ const Profile: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
 
-  // const { user, updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const handleSubmit = useCallback(async (data: ProfileFormData) => {
     try {
@@ -117,9 +117,16 @@ const Profile: React.FC = () => {
       </header>
 
       <Content>
-        <Form ref={formRef} onSubmit={handleSubmit}>
+        <Form
+          ref={formRef}
+          initialData={{
+            name: user.name,
+            email: user.email
+          }}
+          onSubmit={handleSubmit}
+        >
           <AvatarInput>
-            <img src="https://avatars.githubusercontent.com/u/81584638?v=4" alt="Eduardo Silva" />
+            <img src={user.avatar_url} alt={user.name} />
             <label htmlFor="avatar">
               <FiCamera />
               <input type="file" id="avatar" onChange={handleAvatarChange} />
