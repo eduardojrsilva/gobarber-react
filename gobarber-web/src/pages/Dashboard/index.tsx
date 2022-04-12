@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, /*useEffect,*/ useMemo, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { ptBR } from 'date-fns/locale'
-import { isSunday, isSaturday } from 'date-fns';
+import { isSunday, isSaturday, isToday, format } from 'date-fns';
 
 import { FiClock, FiPower } from 'react-icons/fi';
 import {
@@ -19,11 +19,62 @@ import {
 
 import logoImg from '../../assets/logo.svg';
 import { useAuth } from '../../hooks/auth';
+// import api from '../../services/api';
+import { Link } from 'react-router-dom';
+
+interface MonthAvailabilityItem {
+  day: number;
+  available: boolean;
+}
 
 const Dashboard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  const { signOut, user } = useAuth();
+  const [monthAvailability, setMonthAvailability] = useState<MonthAvailabilityItem[]>([]);
+
+  const { signOut, /*user*/ } = useAuth();
+
+  const handleMonthChange = useCallback((month: Date) => {
+    setCurrentMonth(month);
+  }, []);
+
+  // useEffect(() => {
+  //   api.get(`/providers/${user.id}/month-availability`, {
+  //     // headers: {
+  //     //   'Authorization': `Bearer token`
+  //     // },
+  //     params: {
+  //       year: currentMonth.getFullYear(),
+  //       month: currentMonth.getMonth() + 1,
+  //     }
+  //   }).then(response => {
+  //     setMonthAvailability(response.data);
+  //   });
+  // }, [currentMonth, user.id]);
+
+  const disabledDays = useMemo(() => {
+    const dates = monthAvailability
+    .filter(monthDay => monthDay.available === false)
+    .map(monthDay => {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+
+      const date = new Date(year, month, monthDay.day);
+    });
+
+    return dates;
+  }, [currentMonth, monthAvailability]);
+
+  const selectedDateAsText = useMemo(() => {
+    return format(selectedDate as Date, "'Dia' dd 'de' MMMM", {
+      locale: ptBR,
+    });
+  }, [selectedDate]);
+
+  const selectedWeekDay = useMemo(() => {
+    return format(selectedDate as Date, 'cccc', {locale: ptBR});
+  }, [selectedDate]);
 
   return (
     <Container>
@@ -36,8 +87,8 @@ const Dashboard: React.FC = () => {
             <img src="https://avatars.githubusercontent.com/u/81584638?v=4" alt="Eduardo Silva" />
             <div>
               <span>Bem-vindo,</span>
-              {/* <strong>{user.name}</strong> */}
-              <strong>Eduardo</strong>
+              {/* <Link><strong>{user.name}</strong></Link> */}
+              <Link to="/profile"><strong>Eduardo</strong></Link>
             </div>
           </Profile>
 
@@ -51,9 +102,9 @@ const Dashboard: React.FC = () => {
         <Schedule>
           <h1>Horários agendados</h1>
           <p>
-            <span>Hoje</span>
-            <span>Dia 06</span>
-            <span>Segunda-feira</span>
+            {isToday(selectedDate as Date) && <span>Hoje</span>}
+            <span>{selectedDateAsText}</span>
+            <span>{selectedWeekDay}</span>
           </p>
 
           <NextAppointment>
@@ -122,9 +173,10 @@ const Dashboard: React.FC = () => {
             mode="single"
             selected={selectedDate}
             onSelect={setSelectedDate}
+            onMonthChange={handleMonthChange}
             locale={ptBR}
             fromMonth={new Date()}
-            disabled={[isSunday, isSaturday]}
+            disabled={[isSunday, isSaturday/*, disabledDays*/]}
           />
         </Calendar>
       </Content>

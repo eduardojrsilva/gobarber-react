@@ -5,6 +5,8 @@ import SignIn from '../pages/SignIn';
 import SignUp from '../pages/SignUp';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
+
+import Profile from '../pages/Profile';
 import Dashboard from '../pages/Dashboard';
 
 const Router: React.FC = () => (
@@ -13,6 +15,8 @@ const Router: React.FC = () => (
     <Route path="/signup" element={<SignUp/>} />
     <Route path="/forgot-password" element={<ForgotPassword/>} />
     <Route path="/reset-password" element={<ResetPassword/>} />
+
+    <Route path="/profile" element={<Profile/>} />
     <Route path="/dashboard" element={<Dashboard/>} />
   </Routes>
 );
