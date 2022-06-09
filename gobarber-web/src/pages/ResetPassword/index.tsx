@@ -4,6 +4,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { useLocation } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
@@ -25,6 +26,8 @@ const ResetPassword: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
   const { addToast } = useToast();
+
+  const history = createBrowserHistory();
 
   const location = useLocation();
 
@@ -54,6 +57,7 @@ const ResetPassword: React.FC = () => {
         token,
       });
 
+      history.push('/');
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const errors = getValidationErrors(err);

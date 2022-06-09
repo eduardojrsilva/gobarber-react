@@ -1,4 +1,4 @@
-import React, { useCallback, /*useEffect,*/ useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DayPicker, { DayModifiers, ModifiersUtils } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import { ptBR } from 'date-fns/locale'
@@ -19,7 +19,7 @@ import {
 
 import logoImg from '../../assets/logo.svg';
 import { useAuth } from '../../hooks/auth';
-// import api from '../../services/api';
+import api from '../../services/api';
 import { Link } from 'react-router-dom';
 
 interface MonthAvailabilityItem {
@@ -27,7 +27,7 @@ interface MonthAvailabilityItem {
   available: boolean;
 }
 
-interface AppointmentData {
+interface Appointments {
   id: string
   date: string
   hourFormatted: string
@@ -37,38 +37,13 @@ interface AppointmentData {
   }
 }
 
-const fakeAppointments: AppointmentData[] = [
-  {
-    id: '46545',
-    date: "2022-04-13T13:00:00.000Z",
-    hourFormatted: "",
-    user: {
-      name: 'Edu',
-      avatar_url: "https://avatars.githubusercontent.com/u/81584638?v=4",
-    }
-  },
-  {
-    id: '46545',
-    date: "2022-04-13T17:00:00.000Z",
-    hourFormatted: "",
-    user: {
-      name: 'Bat',
-      avatar_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_cmS706xd4mbzo8I-mbYd8YDviGyzKGX4lQ&usqp=CAU",
-    }
-  },
-];
-
-fakeAppointments.forEach(fa => {
-  fa.hourFormatted = format(parseISO(fa.date), 'HH:mm')
-})
-
 const Dashboard: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const [monthAvailability, setMonthAvailability] = useState<MonthAvailabilityItem[]>([]);
   
-  const [appointments, setAppointments] = useState<AppointmentData[]>(fakeAppointments);
+  const [appointments, setAppointments] = useState<Appointments[]>([]);
 
   const { signOut, user } = useAuth();
 
@@ -82,19 +57,35 @@ const Dashboard: React.FC = () => {
     setCurrentMonth(month);
   }, []);
 
-  // useEffect(() => {
-  //   api.get(`/providers/${user.id}/month-availability`, {
-  //     // headers: {
-  //     //   'Authorization': `Bearer token`
-  //     // },
-  //     params: {
-  //       year: currentMonth.getFullYear(),
-  //       month: currentMonth.getMonth() + 1,
-  //     }
-  //   }).then(response => {
-  //     setMonthAvailability(response.data);
-  //   });
-  // }, [currentMonth, user.id]);
+  useEffect(() => {
+    api.get(`/providers/${user.id}/month-availability`, {
+      params: {
+        year: currentMonth.getFullYear(),
+        month: currentMonth.getMonth() + 1,
+      }
+    }).then(response => {
+      setMonthAvailability(response.data);
+    });
+  }, [currentMonth, user.id]);
+
+  useEffect(() => {
+    api.get<Appointments[]>(`/appointments/me`, {
+      params: {
+        year: selectedDate.getFullYear(),
+        month: selectedDate.getMonth() + 1,
+        day: selectedDate.getDate(),
+      }
+    }).then(response => {
+      const appointmentsFormatted = response.data.map(appointment => {
+        return {
+          ...appointment,
+          hourFormatted: format(parseISO(appointment.date), "HH:mm"),
+        };
+      });
+
+      setAppointments(appointmentsFormatted);
+    });
+  }, [selectedDate]);
 
   const disabledDays = useMemo(() => {
     const dates = monthAvailability
@@ -103,7 +94,7 @@ const Dashboard: React.FC = () => {
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth();
 
-      const date = new Date(year, month, monthDay.day);
+      return new Date(year, month, monthDay.day);
     });
 
     return dates;
@@ -233,7 +224,7 @@ const Dashboard: React.FC = () => {
           <DayPicker
             weekdaysShort={['D', 'S', 'T', 'Q', 'Q', 'S', 'S']}
             fromMonth={new Date()}
-            disabledDays={[{ daysOfWeek: [0, 6]}]}
+            disabledDays={[{ daysOfWeek: [0, 6]}, ...disabledDays]}
             modifiers={{
               available: { daysOfWeek: [1, 2, 3, 4, 5] },
             }}

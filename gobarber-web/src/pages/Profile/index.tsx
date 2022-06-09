@@ -5,15 +5,15 @@ import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { Link } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import { Container, Content, AvatarInput } from './styles';
 import { useAuth } from '../../hooks/auth';
-// import api from '../../services/api';
-import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
+import { useToast } from '../../hooks/toast';
 
 interface ProfileFormData {
   name: string;
@@ -25,9 +25,13 @@ interface ProfileFormData {
 
 const Profile: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
-  const { addToast } = useToast();
 
+  const [loading, setLoading] = useState(false);
+
+  const { addToast } = useToast();
   const { user, updateUser } = useAuth();
+
+  const history = createBrowserHistory();
 
   const handleSubmit = useCallback(async (data: ProfileFormData) => {
     try {
@@ -54,6 +58,8 @@ const Profile: React.FC = () => {
         abortEarly: false
       });
 
+      setLoading(true);
+
       const { name, email, old_password, password, password_confirmation } = data;
 
       const formData = Object.assign({
@@ -65,8 +71,12 @@ const Profile: React.FC = () => {
         password_confirmation,
       } : {});
 
-      // await api.put('/profile', formData);
+      const response = await api.put('/profile', formData);
 
+      updateUser(response.data);
+
+      history.push('/dashboard');
+      
       addToast({
         type: 'success',
         title: 'Perfil atualizado!',
@@ -86,8 +96,11 @@ const Profile: React.FC = () => {
         title: 'Erro na atualização',
         description: 'Ocorreu um erro ao atualizar perfil, tente novamente.',
       });
+    } 
+    finally {
+      setLoading(false);
     }
-  }, [addToast]);
+  }, [addToast, history, updateUser]);
 
   const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -95,16 +108,16 @@ const Profile: React.FC = () => {
 
       data.append('avatar', e.target.files[0]);
 
-      // api.patch('/users/avatar', data).then((response) => {
-      //   updateUser(response.data);
+      api.patch('/users/avatar', data).then((response) => {
+        updateUser(response.data);
 
-      //   addToast({
-      //     type: 'success',
-      //     title: 'Avatar atualizado!',
-      //   });
-      // });
+        addToast({
+          type: 'success',
+          title: 'Avatar atualizado!',
+        });
+      });
     }
-  }, [/*addToast, updateUser*/]);
+  }, [addToast, updateUser]);
 
   return (
     <Container>
@@ -160,7 +173,7 @@ const Profile: React.FC = () => {
             placeholder="Confirmar senha"
           />
 
-          <Button type="submit">Confirmar mudanças</Button>
+          <Button loading={loading} type="submit">Confirmar mudanças</Button>
         </Form>
       </Content>
     </Container>
