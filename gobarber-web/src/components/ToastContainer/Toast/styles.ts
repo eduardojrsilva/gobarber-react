@@ -2,8 +2,8 @@ import styled, { css } from 'styled-components';
 import { animated } from 'react-spring';
  
 interface ContainerProps {
-  type?: 'success' | 'error' | 'info';
-  hasDescription: boolean;
+  $type?: 'success' | 'error' | 'info';
+  $hasDescription: boolean;
 }
 
 export const toastTypesVariations = {
@@ -35,7 +35,7 @@ export const Container = styled(animated.div)<ContainerProps>`
     margin-top: 8px;
   }
 
-  ${props => toastTypesVariations[props.type || 'info']}
+  ${({ $type }) => toastTypesVariations[$type || 'info']}
 
   > svg {
     margin: 4px 12px 0 0;
@@ -62,11 +62,13 @@ export const Container = styled(animated.div)<ContainerProps>`
     color: inherit;
   }
 
-  ${props => !props.hasDescription && css`
-    align-items: center;
+  ${({ $hasDescription }) =>
+    !$hasDescription &&
+    css`
+      align-items: center;
 
-    svg {
-      margin-top: 0;
-    }
-  `}
+      svg {
+        margin-top: 0;
+      }
+    `}
 `;

@@ -1,13 +1,19 @@
 import React, { useEffect } from "react";
 import { FiAlertCircle, FiCheckCircle, FiInfo, FiXCircle } from "react-icons/fi";
+import { SpringValue } from 'react-spring';
 
 import { ToastMessage, useToast } from "../../../hooks/toast";
 
 import { Container } from "./styles";
 
+interface ToastStyle {
+  right: SpringValue<string>;
+  opacity: SpringValue<number>;
+}
+
 interface ToastProps {
   message: ToastMessage;
-  // style: object;
+  style: ToastStyle;
 }
 
 const icons = {
@@ -16,7 +22,7 @@ const icons = {
   success: <FiCheckCircle size={24} />,
 }
 
-const Toast: React.FC<ToastProps> = ({ message/*, style*/ }) => {
+const Toast: React.FC<ToastProps> = ({ message, style }) => {
   const { removeToast } = useToast();
 
   useEffect(() => {
@@ -31,9 +37,9 @@ const Toast: React.FC<ToastProps> = ({ message/*, style*/ }) => {
 
   return (
     <Container
-      type={message.type}
-      hasDescription={!!message.description}
-      // style={style}
+      $type={message.type}
+      $hasDescription={!!message.description}
+      style={style}
     >
       {icons[message.type || 'info']}
 
