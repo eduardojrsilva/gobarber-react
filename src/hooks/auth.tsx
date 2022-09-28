@@ -33,10 +33,10 @@ const AuthProvider: React.FC = ({ children }) => {
     const user = localStorage.getItem('@GoBarber:user');
 
     if (token && user) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       return { token, user: JSON.parse(user) };
     }
-
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     return {} as AuthState;
   });
